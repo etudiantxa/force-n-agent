@@ -1,0 +1,31 @@
+[2026-07-21T19:07:07.985900+00:00] Début de la vérification (6 pages à contrôler)
+[2026-07-21T19:07:17.745994+00:00] ERREUR lors du fetch de https://force-n.sn/formations/developpement-web : 404 Client Error: Not Found for url: https://force-n.sn/formations/developpement-web
+[2026-07-21T19:07:24.758167+00:00] ERREUR lors du fetch de https://force-n.sn/formations/ia-llm : 404 Client Error: Not Found for url: https://force-n.sn/formations/ia-llm
+[2026-07-21T19:07:35.351230+00:00] ERREUR lors du fetch de https://force-n.sn/actualites/appel-cohorte-8 : 404 Client Error: Not Found for url: https://force-n.sn/actualites/appel-cohorte-8
+[2026-07-21T19:07:50.759650+00:00] CHANGEMENT DÉTECTÉ : https://force-n.sn/faq
+[2026-07-21T19:07:56.820704+00:00] ERREUR lors du fetch de https://force-n.sn/partenaires/mastercard-foundation : 404 Client Error: Not Found for url: https://force-n.sn/partenaires/mastercard-foundation
+[2026-07-21T19:08:07.351580+00:00] ERREUR lors du fetch de https://force-n.sn/temoignages/alumni-3 : 404 Client Error: Not Found for url: https://force-n.sn/temoignages/alumni-3
+[2026-07-21T19:08:09.368708+00:00] Vérification terminée. 1 page(s) modifiée(s).
+[2026-07-21T19:13:55.352858+00:00] Début de la vérification (6 pages à contrôler)
+[2026-07-21T19:14:00.578487+00:00] ERREUR lors du fetch de https://force-n.sn/formations/developpement-web : 404 Client Error: Not Found for url: https://force-n.sn/formations/developpement-web
+[2026-07-21T19:14:08.864047+00:00] ERREUR lors du fetch de https://force-n.sn/formations/ia-llm : 404 Client Error: Not Found for url: https://force-n.sn/formations/ia-llm
+[2026-07-21T19:14:19.438964+00:00] ERREUR lors du fetch de https://force-n.sn/actualites/appel-cohorte-8 : 404 Client Error: Not Found for url: https://force-n.sn/actualites/appel-cohorte-8
+[2026-07-21T19:14:30.992979+00:00] ERREUR lors du fetch de https://force-n.sn/partenaires/mastercard-foundation : 404 Client Error: Not Found for url: https://force-n.sn/partenaires/mastercard-foundation
+[2026-07-21T19:14:37.227823+00:00] ERREUR lors du fetch de https://force-n.sn/temoignages/alumni-3 : 404 Client Error: Not Found for url: https://force-n.sn/temoignages/alumni-3
+[2026-07-21T19:14:39.242276+00:00] Vérification terminée. 0 page(s) modifiée(s).
+[2026-07-21T19:17:21.875133+00:00] Début de la vérification (6 pages à contrôler)
+[2026-07-21T19:17:27.780345+00:00] ERREUR lors du fetch de https://force-n.sn/formations/developpement-web : 404 Client Error: Not Found for url: https://force-n.sn/formations/developpement-web
+[2026-07-21T19:17:39.209618+00:00] ERREUR lors du fetch de https://force-n.sn/formations/ia-llm : 404 Client Error: Not Found for url: https://force-n.sn/formations/ia-llm
+[2026-07-21T19:17:43.400733+00:00] ERREUR lors du fetch de https://force-n.sn/actualites/appel-cohorte-8 : 404 Client Error: Not Found for url: https://force-n.sn/actualites/appel-cohorte-8
+[2026-07-21T19:17:50.999078+00:00] CHANGEMENT DÉTECTÉ : https://force-n.sn/faq
+[2026-07-21T19:17:56.659345+00:00] ERREUR lors du fetch de https://force-n.sn/partenaires/mastercard-foundation : 404 Client Error: Not Found for url: https://force-n.sn/partenaires/mastercard-foundation
+[2026-07-21T19:18:01.378936+00:00] ERREUR lors du fetch de https://force-n.sn/temoignages/alumni-3 : 404 Client Error: Not Found for url: https://force-n.sn/temoignages/alumni-3
+[2026-07-21T19:18:03.396917+00:00] Vérification terminée. 1 page(s) modifiée(s).
+[2026-07-21T19:32:55.740640+00:00] === Déclenchement de la vérification planifiée ===
+[2026-07-21T19:32:55.751545+00:00] Début de la vérification (6 pages à contrôler)
+[2026-07-21T19:32:59.774433+00:00] ERREUR lors du fetch de https://force-n.sn/formations/developpement-web : 404 Client Error: Not Found for url: https://force-n.sn/formations/developpement-web
+[2026-07-21T19:33:04.186344+00:00] ERREUR lors du fetch de https://force-n.sn/formations/ia-llm : 404 Client Error: Not Found for url: https://force-n.sn/formations/ia-llm
+[2026-07-21T19:33:09.003898+00:00] ERREUR lors du fetch de https://force-n.sn/actualites/appel-cohorte-8 : 404 Client Error: Not Found for url: https://force-n.sn/actualites/appel-cohorte-8
+[2026-07-21T19:33:18.453956+00:00] ERREUR lors du fetch de https://force-n.sn/partenaires/mastercard-foundation : 404 Client Error: Not Found for url: https://force-n.sn/partenaires/mastercard-foundation
+[2026-07-21T19:33:23.650792+00:00] ERREUR lors du fetch de https://force-n.sn/temoignages/alumni-3 : 404 Client Error: Not Found for url: https://force-n.sn/temoignages/alumni-3
+[2026-07-21T19:33:25.709123+00:00] Vérification terminée. 0 page(s) modifiée(s).

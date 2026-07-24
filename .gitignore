@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Environnement virtuel Python
+venv/
+env/
+.venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Base vectorielle persistée (générée par le code, pas besoin sur GitHub)
+chroma_db/
+
+# Logs du module de surveillance
+*.log
+updater/logs/
+
+# Fichiers système
+.DS_Store

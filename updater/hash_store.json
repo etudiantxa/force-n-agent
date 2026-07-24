@@ -1,0 +1,38 @@
+{
+  "https://force-n.sn/formations/developpement-web": {
+    "hash": "9c6200db973e2deedf867187bc6e2b0cf73c66139c243f0c230bdc5759d1e99f",
+    "title": "Certificat en Développement Web Full Stack",
+    "category": "formation",
+    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+  },
+  "https://force-n.sn/formations/ia-llm": {
+    "hash": "2c8ed977d5b94cb480138252ba4fc9dc8effaec1d3bcf04ad702608ca00f092b",
+    "title": "Certificat en Intelligence Artificielle et LLM",
+    "category": "formation",
+    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+  },
+  "https://force-n.sn/actualites/appel-cohorte-8": {
+    "hash": "91dce8d07dbe51d3e615bba9f78d538a14dd30af69ceb28d5f602ada80ca79f8",
+    "title": "Appel a candidatures - Cohorte 8",
+    "category": "actualite",
+    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+  },
+  "https://force-n.sn/faq": {
+    "hash": "2ee5605e40a50f684dbfb2999f0ad143809a20d1d8217343736367c767aec4e3",
+    "title": "FAQ - Conditions d'admission",
+    "category": "faq",
+    "last_checked": "2026-07-21T19:33:13.775239+00:00"
+  },
+  "https://force-n.sn/partenaires/mastercard-foundation": {
+    "hash": "2979bf683c3bee4dabd195b557705bbe98a4245b2fa921aa78c0971200ba730f",
+    "title": "Partenariat avec la Fondation Mastercard",
+    "category": "partenaire",
+    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+  },
+  "https://force-n.sn/temoignages/alumni-3": {
+    "hash": "8fedcaaa7ef921833669eaa245e72c25f5ac0e8cab00dd5895a6df3c02daa9ea",
+    "title": "Temoignage - Parcours d'une alumni",
+    "category": "temoignage",
+    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+  }
+}

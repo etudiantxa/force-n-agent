@@ -1,0 +1,22 @@
+# --- Orchestration LLM ---
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-google-genai>=1.0.0     # pour Gemini
+langchain-openai>=0.1.0           # pour Grok (API compatible OpenAI)
+openai>=1.30.0                    # dépendance de langchain-openai
+
+# --- Embeddings & base vectorielle ---
+sentence-transformers>=2.7.0
+chromadb>=0.5.0
+
+# --- Scraping / surveillance des mises à jour ---
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+apscheduler>=3.10.0
+
+# --- Interface conversationnelle ---
+chainlit>=1.1.0
+
+# --- Utilitaires ---
+python-dotenv>=1.0.0
+pandas>=2.2.0

@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Certificat en Développement Web Full Stack",
+    "content": "Le certificat en Développement Web Full Stack forme les apprenants aux technologies front-end (HTML, CSS, JavaScript, React) et back-end (Node.js, bases de données). Durée : 6 mois. Conditions d'admission : avoir moins de 36 ans, résider au Sénégal, niveau BAC minimum. Les candidatures ouvrent chaque trimestre.",
+    "category": "formation",
+    "url": "https://force-n.sn/formations/developpement-web",
+    "last_modified": "2026-03-15"
+  },
+  {
+    "title": "Certificat en Intelligence Artificielle et LLM",
+    "content": "Ce certificat couvre les fondamentaux des grands modeles de langage (LLM), l'architecture RAG, le prompt engineering et le deploiement d'agents conversationnels. Duree : 4 mois. Pas de prerequis en IA, mais des bases en programmation Python sont recommandees.",
+    "category": "formation",
+    "url": "https://force-n.sn/formations/ia-llm",
+    "last_modified": "2026-05-02"
+  },
+  {
+    "title": "Appel a candidatures - Cohorte 8",
+    "content": "Le programme FORCE-N lance son appel a candidatures pour la cohorte 8. Les candidatures sont ouvertes du 1er juin au 30 juin 2026. Tous les certificats sont concernes. Pour postuler, rendez-vous sur le portail d'inscription en ligne.",
+    "category": "actualite",
+    "url": "https://force-n.sn/actualites/appel-cohorte-8",
+    "last_modified": "2026-06-01"
+  },
+  {
+    "title": "FAQ - Conditions d'admission",
+    "content": "Question : Quel est l'age maximum pour candidater ? Reponse : Le programme s'adresse aux jeunes senegalais de moins de 36 ans. Question : Faut-il payer des frais d'inscription ? Reponse : Non, la formation est entierement gratuite pour les beneficiaires selectionnes.",
+    "category": "faq",
+    "url": "https://force-n.sn/faq",
+    "last_modified": "2026-01-10"
+  },
+  {
+    "title": "Partenariat avec la Fondation Mastercard",
+    "content": "Le programme FORCE-N est finance par la Fondation Mastercard dans le cadre de son engagement pour l'employabilite des jeunes en Afrique. Ce partenariat vise a former 80 000 jeunes senegalais aux metiers du numerique entre 2022 et 2026.",
+    "category": "partenaire",
+    "url": "https://force-n.sn/partenaires/mastercard-foundation",
+    "last_modified": "2025-11-20"
+  },
+  {
+    "title": "Temoignage - Parcours d'une alumni",
+    "content": "Apres avoir suivi le certificat en developpement mobile, j'ai pu decrocher un emploi dans une startup dakaroise specialisee dans les paiements mobiles. Le programme FORCE-N m'a permis d'acquerir des competences concretes et un reseau professionnel solide.",
+    "category": "temoignage",
+    "url": "https://force-n.sn/temoignages/alumni-3",
+    "last_modified": "2025-09-05"
+  }
+]
