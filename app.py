@@ -11,7 +11,6 @@ Version 2 (complète) :
 """
 
 import os
-import asyncio
 import chainlit as cl
 from rag_pipeline.agent import stream_agent_response
 from rag_pipeline.vectorstore import get_embedding_function, get_chroma_client
@@ -32,7 +31,7 @@ except Exception as e:
 # Démarrage du scheduler de surveillance des mises à jour, en tâche de
 # fond, une seule fois au lancement de l'application.
 try:
-    scheduler = start_scheduler()
+    start_scheduler()
 except Exception as e:
     print(f"Erreur lors du démarrage du scheduler : {e}")
 
@@ -162,14 +161,3 @@ async def main(message: cl.Message):
         await response_msg.stream_token(token)
 
     await response_msg.update()
-
-
-# Configuration du serveur pour Render
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    cl.run(
-        main=main,
-        host="0.0.0.0",
-        port=port,
-        title="Force-N Agent"
-    )
