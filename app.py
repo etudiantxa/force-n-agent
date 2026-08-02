@@ -32,11 +32,18 @@ start_scheduler()
 # Approche volontairement légère (pas de LLM nécessaire pour cette
 # détection) : suffisante pour un projet éducatif, et évite une
 # dépendance supplémentaire à l'API pour un choix binaire simple.
+#
+# On cherche des SOUS-CHAÎNES génériques plutôt que des phrases exactes,
+# pour couvrir naturellement toutes les variantes que peut taper un
+# utilisateur : "mail" couvre à la fois "mail", "e-mail", "email",
+# "mails", "emails" ; "candidat" couvre "candidature", "candidater",
+# "candidat" ; etc.
 EMAIL_KEYWORDS = [
-    "envoyer un e-mail", "envoyer un email", "envoyer un mail",
-    "écrire un e-mail", "écrire un email", "écrire un mail",
-    "contacter l'équipe", "contacter force-n", "poser ma candidature",
-    "envoyer ma candidature", "envoie un mail", "envoie un e-mail",
+    "mail",        # couvre : mail, e-mail, email, mails, emails
+    "courriel",
+    "candidat",    # couvre : candidature, candidater, candidat
+    "postuler",
+    "contacter",
 ]
 
 
