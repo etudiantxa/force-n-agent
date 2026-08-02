@@ -10,6 +10,8 @@ Version 2 (complète) :
 - Scheduler de surveillance des mises à jour démarré en arrière-plan
 """
 
+import os
+import asyncio
 import chainlit as cl
 from rag_pipeline.agent import stream_agent_response
 from rag_pipeline.vectorstore import get_embedding_function, get_chroma_client
@@ -20,13 +22,19 @@ from updater.scheduler import start_scheduler
 # démarrage de l'application (pas à la première question posée), pour
 # que le premier échange avec un utilisateur soit rapide.
 print("Préchargement du modèle d'embeddings...")
-get_embedding_function()
-get_chroma_client()
-print("Préchargement terminé.")
+try:
+    get_embedding_function()
+    get_chroma_client()
+    print("Préchargement terminé.")
+except Exception as e:
+    print(f"Erreur lors du préchargement : {e}")
 
 # Démarrage du scheduler de surveillance des mises à jour, en tâche de
 # fond, une seule fois au lancement de l'application.
-start_scheduler()
+try:
+    scheduler = start_scheduler()
+except Exception as e:
+    print(f"Erreur lors du démarrage du scheduler : {e}")
 
 # Mots-clés simples pour détecter l'intention d'envoyer un e-mail.
 # Approche volontairement légère (pas de LLM nécessaire pour cette
@@ -154,3 +162,14 @@ async def main(message: cl.Message):
         await response_msg.stream_token(token)
 
     await response_msg.update()
+
+
+# Configuration du serveur pour Render
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    cl.run(
+        main=main,
+        host="0.0.0.0",
+        port=port,
+        title="Force-N Agent"
+    )
