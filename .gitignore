@@ -19,3 +19,16 @@ updater/logs/
 
 # Fichiers système
 .DS_Store
+
+# Fichiers de données brutes
+data/raw_corpus_txt/
+data/chunks.json
+data/cleaned_corpus.json
+data/sample_corpus.json
+
+# Fichiers d'état de l'updater
+updater/hash_store.json
+updater/update_log.txt
+
+
+

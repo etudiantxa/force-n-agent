@@ -1,38 +1,146 @@
 {
-  "https://force-n.sn/formations/developpement-web": {
-    "hash": "9c6200db973e2deedf867187bc6e2b0cf73c66139c243f0c230bdc5759d1e99f",
-    "title": "Certificat en Développement Web Full Stack",
-    "category": "formation",
-    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+  "https://force-n.sn/a-propos": {
+    "hash": "ed46fd56d46551e9feec130ed8b33495b8d7b2c30818fb147e48d93858b7cb4e",
+    "title": "A propos",
+    "category": "a_propos",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
   },
-  "https://force-n.sn/formations/ia-llm": {
-    "hash": "2c8ed977d5b94cb480138252ba4fc9dc8effaec1d3bcf04ad702608ca00f092b",
-    "title": "Certificat en Intelligence Artificielle et LLM",
-    "category": "formation",
-    "last_checked": "2026-07-21T19:16:58.756804+00:00"
-  },
-  "https://force-n.sn/actualites/appel-cohorte-8": {
-    "hash": "91dce8d07dbe51d3e615bba9f78d538a14dd30af69ceb28d5f602ada80ca79f8",
-    "title": "Appel a candidatures - Cohorte 8",
-    "category": "actualite",
-    "last_checked": "2026-07-21T19:16:58.756804+00:00"
-  },
-  "https://force-n.sn/faq": {
-    "hash": "2ee5605e40a50f684dbfb2999f0ad143809a20d1d8217343736367c767aec4e3",
-    "title": "FAQ - Conditions d'admission",
-    "category": "faq",
-    "last_checked": "2026-07-21T19:33:13.775239+00:00"
-  },
-  "https://force-n.sn/partenaires/mastercard-foundation": {
-    "hash": "2979bf683c3bee4dabd195b557705bbe98a4245b2fa921aa78c0971200ba730f",
-    "title": "Partenariat avec la Fondation Mastercard",
-    "category": "partenaire",
-    "last_checked": "2026-07-21T19:16:58.756804+00:00"
-  },
-  "https://force-n.sn/temoignages/alumni-3": {
-    "hash": "8fedcaaa7ef921833669eaa245e72c25f5ac0e8cab00dd5895a6df3c02daa9ea",
-    "title": "Temoignage - Parcours d'une alumni",
+  "https://force-n.sn/alumni-temoignages": {
+    "hash": "70ac8c7f8bf51d8ea4ae61c0910da9e9dd2a4b8d1e3e4c4490cfa9efe37f40aa",
+    "title": "Alumni - Témoignages",
     "category": "temoignage",
-    "last_checked": "2026-07-21T19:16:58.756804+00:00"
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/articles/force-n-forme-1090-commercants-au-numerique-thiaroye-golf-et-wakhinane-nimzat": {
+    "hash": "74e9652424e7244cb078f9ee3729fc20bfd1277cbe112cd3893024d1c1492e50",
+    "title": "FORCE-N forme 1.090 commerçants au numérique à Thiaroye, Golf et Wakhinane Nimzat",
+    "category": "actualite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/articles/lussein-lun-chk-travers-force-n-et-la-ville-de-kaolack-lancent-la-2e-edition-du-forum-des": {
+    "hash": "18be5a1f59b6ee3e63c35c9d9458a54d0f369da069d1faba6ed5bd3ddc154bf9",
+    "title": "L’USSEIN, l'UN-CHK à travers FORCE-N et la Ville de Kaolack lancent la 2e édition du Forum des métiers",
+    "category": "actualite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/articles/mathematiques-record-de-medailles-pour-le-senegal-aux-olympiades-francophones-2026": {
+    "hash": "12a3cd97be3e7fe0146b72ac71d5892eb3af278a43357277912a8134ec8d44e7",
+    "title": "Mathématiques : record de médailles pour le Sénégal aux Olympiades Francophones 2026",
+    "category": "actualite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/articles/territorialisation-force-n-sonde-les-besoins-de-ziguinchor-et-kolda-en-formation-et": {
+    "hash": "6dd6aff2f7a62c4a544fd03f6c0ee3237faeeba0808e0c4a4e3bdbbaec6bb211",
+    "title": "Territorialisation : FORCE-N sonde les besoins de Ziguinchor et Kolda en formation et entrepreneuriat numérique",
+    "category": "actualite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/composantes/fcc": {
+    "hash": "0f92fbafac935402708bc28ef75301d517c392da00d3c9677c85a066d805039b",
+    "title": "FCC",
+    "category": "formation",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/en": {
+    "hash": "f8c6c79310ef3f3b713cec11d48aed49b97d01134bffb9de3e064d8d11e26aee",
+    "title": "Home",
+    "category": "autre",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/": {
+    "hash": "f5eed2876448eb8c9956ed8b4c5a19d282d22f71d2f7b0cdf4a8e8d887778f47",
+    "title": "Accueil",
+    "category": "accueil",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/actualites": {
+    "hash": "f177879d09b48a5adabcb2cafb2f343388d8a5aa24466f59a2133e7be53622d1",
+    "title": "Actualités",
+    "category": "actualite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/catalogue": {
+    "hash": "27f3c7e2b49ff9f6143f8e115be5e38c9cc0e050d101386bea05253cdfc6a96a",
+    "title": "Catalogue",
+    "category": "formation",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/faq": {
+    "hash": "30df4a8874bc842a3716b4e5731c9ab8fc9e89167d15658df583c35d58e1c3d7",
+    "title": "FAQ",
+    "category": "faq",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/formations": {
+    "hash": "1db05dc472af8062c7609e067ae0396eb5ac9365b86be7b6a97982c487088696",
+    "title": "Formations",
+    "category": "formation",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/les-partenaires": {
+    "hash": "d1004a47fd5cdd0ccd07d3330afa507dc199beff9f838d0f88b51cef6631924a",
+    "title": "Les partenaires",
+    "category": "partenaire",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/les-services": {
+    "hash": "c8aa56b16e9b4ebc35716bf1d874dbc4dca9c06b64f9476d4dfbd2894d6dd8b5",
+    "title": "Les services",
+    "category": "a_propos",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/missions-et-objectifs": {
+    "hash": "5ff4c6979c3adc41f69144fb66666af454b6b478c6807a2abea19c27baca136e",
+    "title": "Missions et objectifs",
+    "category": "a_propos",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/opportunites/vous-etes-entrepreneur": {
+    "hash": "5a29a43c5d3e01492b0d65119914e92441d677de10f4424447582c20120ad288",
+    "title": "Vous êtes entrepreneur ?",
+    "category": "opportunite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/opportunites/vous-etes-entreprise": {
+    "hash": "2ab8bfd73e1031470a499bfd761801e1390ed006981b05b2f8a0c656b3d10d86",
+    "title": "Vous êtes entreprise ?",
+    "category": "opportunite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/opportunites": {
+    "hash": "d25251fb526aefc0ba43cc510e1bd19bdb595fc9642efd42ad04f920b162895d",
+    "title": "Opportunités",
+    "category": "opportunite",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/parcours-initiatique": {
+    "hash": "69c481bf6589852e3b26de9ad3fb3cb30e9528272e7f4846bbe8895dab3485f8",
+    "title": "Parcours initiatique",
+    "category": "formation",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/promotion-des-sciences": {
+    "hash": "8c8b0a07ad34cbb6d8cfc4c1e76a9b0c145ce31e321b24cc1df11d1e98685ae2",
+    "title": "Promotion des sciences",
+    "category": "formation",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/qui-sommes-nous": {
+    "hash": "5e8d6b97700518806a011bd02f4ccc78e739336f151cd424cbe6e556cd79dee9",
+    "title": "Qui sommes-nous ?",
+    "category": "a_propos",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/index.php/sigui": {
+    "hash": "7e451ceb049cc0bb26529e81a3eb347fc5dfb132d2d3fb76a8fa2ba4b32eccf0",
+    "title": "SIGUI",
+    "category": "formation",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
+  },
+  "https://force-n.sn/node/1?page=1": {
+    "hash": "370d6279288ce5491fcbdc58eb805d9b8e8a8b662a9267c0c5d57b9934128260",
+    "title": "Accueil",
+    "category": "accueil",
+    "last_checked": "2026-08-09T13:35:19.276472+00:00"
   }
 }
