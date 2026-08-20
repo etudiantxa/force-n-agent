@@ -1,18 +1,17 @@
 """
 Interface Chainlit de l'agent conversationnel FORCE-N.
 
-Version 2 (complète) :
-- Agent RAG conversationnel avec streaming (comme la version 1)
-- Détection de l'intention d'envoyer un e-mail
+- Agent RAG conversationnel avec streaming
+- Classification d'intention par LLM (pas de mots-clés) pour distinguer
+  une vraie demande d'envoi d'e-mail d'une simple question
 - Collecte conversationnelle des informations (destinataire, objet, corps)
 - Brouillon affiché avec boutons de confirmation/annulation
 - Envoi SMTP réel uniquement après confirmation explicite de l'utilisateur
 - Scheduler de surveillance des mises à jour démarré en arrière-plan
 """
 
-import os
 import chainlit as cl
-from rag_pipeline.agent import stream_agent_response
+from rag_pipeline.agent import stream_agent_response, classify_email_intent
 from rag_pipeline.vectorstore import get_embedding_function, get_chroma_client
 from email_tool.tool import draft_email, send_confirmed_email
 from updater.scheduler import start_scheduler
@@ -21,43 +20,13 @@ from updater.scheduler import start_scheduler
 # démarrage de l'application (pas à la première question posée), pour
 # que le premier échange avec un utilisateur soit rapide.
 print("Préchargement du modèle d'embeddings...")
-try:
-    get_embedding_function()
-    get_chroma_client()
-    print("Préchargement terminé.")
-except Exception as e:
-    print(f"Erreur lors du préchargement : {e}")
+get_embedding_function()
+get_chroma_client()
+print("Préchargement terminé.")
 
 # Démarrage du scheduler de surveillance des mises à jour, en tâche de
 # fond, une seule fois au lancement de l'application.
-try:
-    start_scheduler()
-except Exception as e:
-    print(f"Erreur lors du démarrage du scheduler : {e}")
-
-# Mots-clés simples pour détecter l'intention d'envoyer un e-mail.
-# Approche volontairement légère (pas de LLM nécessaire pour cette
-# détection) : suffisante pour un projet éducatif, et évite une
-# dépendance supplémentaire à l'API pour un choix binaire simple.
-#
-# On cherche des SOUS-CHAÎNES génériques plutôt que des phrases exactes,
-# pour couvrir naturellement toutes les variantes que peut taper un
-# utilisateur : "mail" couvre à la fois "mail", "e-mail", "email",
-# "mails", "emails" ; "candidat" couvre "candidature", "candidater",
-# "candidat" ; etc.
-EMAIL_KEYWORDS = [
-    "mail",        # couvre : mail, e-mail, email, mails, emails
-    "courriel",
-    "candidat",    # couvre : candidature, candidater, candidat
-    "postuler",
-    "contacter",
-]
-
-
-def is_email_request(text: str) -> bool:
-    """Détecte si le message de l'utilisateur exprime l'intention d'envoyer un e-mail."""
-    lowered = text.lower()
-    return any(keyword in lowered for keyword in EMAIL_KEYWORDS)
+start_scheduler()
 
 
 async def collect_and_confirm_email():
@@ -73,7 +42,7 @@ async def collect_and_confirm_email():
     if not to_response:
         await cl.Message(content="Envoi annulé (pas de réponse reçue à temps).").send()
         return
-    to = to_response["output"]
+    to = to_response["output"].strip()
 
     subject_response = await cl.AskUserMessage(
         content="Quel est l'objet de l'e-mail ?", timeout=180
@@ -81,7 +50,7 @@ async def collect_and_confirm_email():
     if not subject_response:
         await cl.Message(content="Envoi annulé (pas de réponse reçue à temps).").send()
         return
-    subject = subject_response["output"]
+    subject = subject_response["output"].strip()
 
     body_response = await cl.AskUserMessage(
         content="Que veux-tu écrire dans le message ?", timeout=300
@@ -89,7 +58,7 @@ async def collect_and_confirm_email():
     if not body_response:
         await cl.Message(content="Envoi annulé (pas de réponse reçue à temps).").send()
         return
-    body = body_response["output"]
+    body = body_response["output"].strip()
 
     draft_preview = draft_email.invoke({"to": to, "subject": subject, "body": body})
 
@@ -148,9 +117,12 @@ async def start():
 async def main(message: cl.Message):
     """
     Appelé à chaque message envoyé par l'utilisateur.
-    Route soit vers le workflow e-mail, soit vers l'agent RAG (streaming).
+    Route soit vers le workflow e-mail, soit vers l'agent RAG (streaming),
+    selon une classification d'intention par LLM (pas de mots-clés).
     """
-    if is_email_request(message.content):
+    wants_email = await classify_email_intent(message.content)
+
+    if wants_email:
         await collect_and_confirm_email()
         return
 

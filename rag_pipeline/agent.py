@@ -4,14 +4,23 @@ Module de l'agent conversationnel RAG.
 Ce script connecte :
 1. Le retriever ChromaDB (rag_pipeline/vectorstore.py) — pour récupérer
    les chunks pertinents par rapport à une question
-2. Un LLM (Gemini, via l'API gratuite Google AI Studio) — pour générer
+2. Un LLM (Gemini, avec fallback automatique vers Grok) — pour générer
    une réponse en langage naturel à partir de ces chunks
 
 Le prompt est conçu pour limiter les hallucinations : le LLM doit
-s'appuyer uniquement sur le contexte fourni, citer sa source, et dire
-clairement qu'il ne sait pas si l'information n'est pas dans le contexte.
+s'appuyer uniquement sur le contexte fourni, citer sa source UNIQUEMENT
+quand il répond réellement à partir du contexte, et dire clairement
+qu'il ne sait pas si l'information n'est pas dans le contexte (sans
+alors inventer de fausse source).
+
+Ce module fournit aussi classify_email_intent(), qui remplace une
+détection par mots-clés (trop fragile) par une classification légère
+via le LLM lui-même : plus fiable pour distinguer une vraie demande
+d'envoi d'e-mail d'une simple question contenant incidemment un mot
+comme "candidater" ou "mail".
 """
 
+import asyncio
 import os
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -25,7 +34,11 @@ load_dotenv()  # charge les variables du fichier .env
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GROK_API_KEY = os.getenv("GROK_API_KEY")
 
-# Le prompt système : c'est ici qu'on force le comportement anti-hallucination
+# Le prompt système : c'est ici qu'on force le comportement anti-hallucination.
+# Point important (corrigé) : la citation de source est maintenant
+# explicitement CONDITIONNÉE à une vraie réponse issue du contexte —
+# sinon l'agent inventait "Source(s) : [Non spécifié]" même quand il
+# répondait qu'il ne savait pas.
 SYSTEM_PROMPT = """Tu es l'assistant conversationnel officiel du programme FORCE-N \
 (Formations Ouvertes pour le Renforcement des Compétences, de l'Emploi et de \
 l'Entrepreneuriat dans le Numérique), un programme de l'Université Numérique \
@@ -35,11 +48,15 @@ Règles strictes que tu dois toujours respecter :
 1. Réponds UNIQUEMENT à partir des informations présentes dans le CONTEXTE ci-dessous.
 2. Si le contexte ne contient pas assez d'informations pour répondre, dis \
 clairement : "Je n'ai pas cette information dans ma base de connaissances actuelle. \
-Je vous invite à consulter directement force-n.sn ou à contacter l'équipe FORCE-N."
+Je vous invite à consulter directement force-n.sn ou à contacter l'équipe FORCE-N." \
+Dans ce cas précis, NE MENTIONNE AUCUNE SOURCE : n'ajoute pas de ligne "Source(s) :", \
+puisque tu n'as rien utilisé du contexte pour répondre.
 3. N'invente JAMAIS d'information (dates, chiffres, conditions) qui n'est pas \
 explicitement dans le contexte.
-4. À la fin de ta réponse, cite systématiquement la ou les sources utilisées, \
-sous la forme : "Source(s) : [titre de la page] (catégorie : ...)".
+4. UNIQUEMENT si tu as répondu à partir d'informations réelles du contexte, cite \
+systématiquement la ou les sources utilisées à la fin de ta réponse, sous la forme : \
+"Source(s) : [titre de la page] (catégorie : ...)". Ne mets jamais de source \
+placeholder ou vide.
 5. Précise que tu es un assistant IA et non un représentant officiel humain de FORCE-N \
 si l'utilisateur te pose une question qui semble l'exiger.
 6. Réponds en français, de manière claire et concise.
@@ -49,6 +66,19 @@ CONTEXTE :
 """
 
 USER_PROMPT = "Question de l'utilisateur : {question}"
+
+# Prompt de classification d'intention (remplace la détection par mots-clés)
+INTENT_SYSTEM_PROMPT = """Tu classifies l'intention d'un message envoyé à un \
+assistant du programme FORCE-N. Réponds par UN SEUL MOT :
+
+- "email" si l'utilisateur exprime clairement l'intention de COMPOSER ou \
+ENVOYER un e-mail (candidature, demande d'information, contact) via l'agent.
+- "question" pour tout le reste — y compris les questions qui parlent DE \
+candidature, de contact, ou d'e-mail sans demander explicitement d'en envoyer \
+un (ex : "comment candidater ?", "quel est l'e-mail de contact ?", "qui peut \
+candidater ?" sont des questions, PAS des demandes d'envoi).
+
+Réponds uniquement par "email" ou "question", sans ponctuation ni explication."""
 
 
 def get_gemini_llm():
@@ -107,6 +137,52 @@ def format_context(retrieved_chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+def extract_text(content) -> str:
+    """
+    Normalise le contenu de la réponse en texte simple, que le LLM
+    renvoie une chaîne (la plupart des modèles) ou une liste de blocs
+    structurés (certains modèles Gemini 3).
+    """
+    if isinstance(content, list):
+        text_parts = [
+            block.get("text", "") for block in content
+            if isinstance(block, dict) and block.get("type") == "text"
+        ]
+        return "\n".join(text_parts).strip()
+    return content
+
+
+async def classify_email_intent(message: str) -> bool:
+    """
+    Détermine si un message exprime une vraie intention d'envoyer un
+    e-mail, via une classification légère par LLM plutôt qu'une simple
+    recherche de mots-clés (trop fragile : ratait des variantes comme
+    "mail" seul, ou au contraire se déclenchait sur toute question
+    contenant "candidat" ou "contact").
+
+    En cas d'échec de l'appel LLM (API indisponible, etc.), on retombe
+    prudemment sur False : mieux vaut traiter le message comme une
+    question normale que de déclencher par erreur le workflow e-mail.
+    """
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", INTENT_SYSTEM_PROMPT),
+        ("user", "{message}"),
+    ])
+
+    for provider_name, get_llm_fn in LLM_PROVIDERS:
+        try:
+            llm = get_llm_fn()
+            chain = prompt | llm
+            response = await chain.ainvoke({"message": message})
+            classification = extract_text(response.content).strip().lower()
+            return "email" in classification
+        except Exception as e:
+            print(f"[Fallback] {provider_name} a échoué pour la classification d'intention ({e}).")
+            continue
+
+    return False  # prudence : par défaut, on ne déclenche pas le workflow e-mail
+
+
 async def stream_agent_response(question: str, n_results: int = 3):
     """
     Version streaming du pipeline agent, pour l'affichage progressif
@@ -114,7 +190,10 @@ async def stream_agent_response(question: str, n_results: int = 3):
     fournisseurs que ask_agent() : si le streaming Gemini échoue avant
     même de commencer, on bascule sur Grok.
     """
-    retrieved_chunks = search(question, n_results=n_results)
+    # search() est une fonction bloquante (calcul CPU). On l'exécute dans
+    # un thread séparé pour ne pas geler la boucle asynchrone de Chainlit
+    # pendant ce temps (sinon l'interface perd la connexion websocket).
+    retrieved_chunks = await asyncio.to_thread(search, question, n_results)
     context = format_context(retrieved_chunks)
 
     prompt = ChatPromptTemplate.from_messages([
@@ -168,25 +247,7 @@ def ask_agent(question: str, n_results: int = 3) -> str:
             last_error = e
             continue
 
-    # Si tous les fournisseurs ont échoué
-    raise RuntimeError(
-        f"Tous les fournisseurs LLM ont échoué. Dernière erreur : {last_error}"
-    )
-
-
-def extract_text(content) -> str:
-    """
-    Normalise le contenu de la réponse en texte simple, que le LLM
-    renvoie une chaîne (la plupart des modèles) ou une liste de blocs
-    structurés (certains modèles Gemini 3).
-    """
-    if isinstance(content, list):
-        text_parts = [
-            block.get("text", "") for block in content
-            if isinstance(block, dict) and block.get("type") == "text"
-        ]
-        return "\n".join(text_parts).strip()
-    return content
+    raise RuntimeError(f"Tous les fournisseurs LLM ont échoué. Dernière erreur : {last_error}")
 
 
 if __name__ == "__main__":
