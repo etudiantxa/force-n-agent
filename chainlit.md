@@ -1,14 +1,15 @@
-# Welcome to Chainlit! 🚀🤖
+# Assistant FORCE-N 🤖
 
-Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
+Bienvenue sur l'assistant conversationnel du programme **FORCE-N** (Formations Ouvertes pour le Renforcement des Compétences, de l'Emploi et de l'Entrepreneuriat dans le Numérique).
 
-## Useful Links 🔗
+Posez vos questions sur :
+- 📚 Les formations et certifications disponibles
+- ✅ Les conditions d'admission
+- 🤝 Les partenaires du programme
+- 💼 Les opportunités d'emploi et d'entrepreneuriat
 
-- **Documentation:** Get started with our comprehensive [Chainlit Documentation](https://docs.chainlit.io) 📚
-- **Discord Community:** Join our friendly [Chainlit Discord](https://discord.gg/k73SQ3FyUh) to ask questions, share your projects, and connect with other developers! 💬
+Vous pouvez aussi me demander d'envoyer un e-mail de candidature ou de contact directement depuis cette conversation.
 
-We can't wait to see what you create with Chainlit! Happy coding! 💻😊
+---
 
-## Welcome screen
-
-To modify the welcome screen, edit the `chainlit.md` file at the root of your project. If you do not want a welcome screen, just leave this file empty.
+*Assistant IA — ne remplace pas les canaux officiels de FORCE-N (force-n.sn)*

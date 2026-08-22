@@ -35,11 +35,37 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GROK_API_KEY = os.getenv("GROK_API_KEY")
 
 # Le prompt système : c'est ici qu'on force le comportement anti-hallucination.
-# Point important (corrigé) : la citation de source est maintenant
-# explicitement CONDITIONNÉE à une vraie réponse issue du contexte —
-# sinon l'agent inventait "Source(s) : [Non spécifié]" même quand il
-# répondait qu'il ne savait pas.
-SYSTEM_PROMPT = """Tu es l'assistant conversationnel officiel du programme FORCE-N \
+# Mis à jour pour inclure l'historique de conversation.
+SYSTEM_PROMPT_WITH_HISTORY = """Tu es l'assistant conversationnel officiel du programme FORCE-N \
+(Formations Ouvertes pour le Renforcement des Compétences, de l'Emploi et de \
+l'Entrepreneuriat dans le Numérique), un programme de l'Université Numérique \
+Cheikh Hamidou KANE financé par la Fondation Mastercard.
+
+Règles strictes que tu dois toujours respecter :
+1. Réponds UNIQUEMENT à partir des informations présentes dans le CONTEXTE ci-dessous OU DANS L'HISTORIQUE DE LA CONVERSATION.
+2. Si le contexte ET l'historique ne contiennent pas assez d'informations pour répondre, dis \
+clairement : "Je n'ai pas cette information dans ma base de connaissances actuelle. \
+Je vous invite à consulter directement force-n.sn ou à contacter l'équipe FORCE-N." \
+Dans ce cas précis, NE MENTIONNE AUCUNE SOURCE : n'ajoute pas de ligne "Source(s) :".
+3. N'invente JAMAIS d'information (dates, chiffres, conditions) qui n'est pas \
+explicitement dans le contexte ou dans l'historique.
+4. UNIQUEMENT si tu as répondu à partir d'informations réelles du contexte ou de \
+l'historique, cite systématiquement la ou les sources utilisées à la fin de ta \
+réponse, sous la forme : "Source(s) : [titre de la page] (catégorie : ...)". \
+Ne mets jamais de source placeholder ou vide.
+5. Précise que tu es un assistant IA et non un représentant officiel humain de FORCE-N \
+si l'utilisateur te pose une question qui semble l'exiger.
+6. Réponds en français, de manière claire et concise.
+
+HISTORIQUE DE LA CONVERSATION :
+{history}
+
+CONTEXTE :
+{context}
+"""
+
+# Ancien prompt, sans historique, conservé pour les fonctions qui ne l'utilisent pas
+SYSTEM_PROMPT_NO_HISTORY = """Tu es l'assistant conversationnel officiel du programme FORCE-N \
 (Formations Ouvertes pour le Renforcement des Compétences, de l'Emploi et de \
 l'Entrepreneuriat dans le Numérique), un programme de l'Université Numérique \
 Cheikh Hamidou KANE financé par la Fondation Mastercard.
@@ -49,8 +75,7 @@ Règles strictes que tu dois toujours respecter :
 2. Si le contexte ne contient pas assez d'informations pour répondre, dis \
 clairement : "Je n'ai pas cette information dans ma base de connaissances actuelle. \
 Je vous invite à consulter directement force-n.sn ou à contacter l'équipe FORCE-N." \
-Dans ce cas précis, NE MENTIONNE AUCUNE SOURCE : n'ajoute pas de ligne "Source(s) :", \
-puisque tu n'as rien utilisé du contexte pour répondre.
+Dans ce cas précis, NE MENTIONNE AUCUNE SOURCE : n'ajoute pas de ligne "Source(s) :".
 3. N'invente JAMAIS d'information (dates, chiffres, conditions) qui n'est pas \
 explicitement dans le contexte.
 4. UNIQUEMENT si tu as répondu à partir d'informations réelles du contexte, cite \
@@ -67,7 +92,8 @@ CONTEXTE :
 
 USER_PROMPT = "Question de l'utilisateur : {question}"
 
-# Prompt de classification d'intention (remplace la détection par mots-clés)
+# Prompt de classification d'intention (utilisé par classify_email_intent,
+# disponible si tu veux revenir à une détection par LLM plutôt que par mots-clés)
 INTENT_SYSTEM_PROMPT = """Tu classifies l'intention d'un message envoyé à un \
 assistant du programme FORCE-N. Réponds par UN SEUL MOT :
 
@@ -137,11 +163,30 @@ def format_context(retrieved_chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+def format_history(chat_history: list[tuple[str, str]]) -> str:
+    """
+    Convertit la liste d'historique [('role', 'message'), ...] en une chaîne
+    lisible par le LLM.
+    """
+    formatted_history = ""
+    for role, content in chat_history:
+        if role == "user":
+            formatted_history += f"Human: {content}\n"
+        elif role == "assistant":
+            formatted_history += f"Assistant: {content}\n"
+    return formatted_history
+
+
 def extract_text(content) -> str:
     """
     Normalise le contenu de la réponse en texte simple, que le LLM
     renvoie une chaîne (la plupart des modèles) ou une liste de blocs
     structurés (certains modèles Gemini 3).
+
+    CETTE FONCTION MANQUAIT DANS LA VERSION PRÉCÉDENTE — c'est elle qui
+    causait le crash "name 'extract_text' is not defined", puisqu'elle
+    est appelée par plusieurs fonctions ci-dessous sans jamais avoir été
+    redéfinie après l'ajout de la gestion de l'historique.
     """
     if isinstance(content, list):
         text_parts = [
@@ -152,13 +197,59 @@ def extract_text(content) -> str:
     return content
 
 
+def get_conversation_chain_with_history():
+    """
+    Crée et configure le pipeline de conversation LangChain avec historique.
+    """
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", SYSTEM_PROMPT_WITH_HISTORY),
+        ("user", USER_PROMPT),
+    ])
+
+    last_error = None
+    for provider_name, get_llm_fn in LLM_PROVIDERS:
+        try:
+            llm = get_llm_fn()
+            chain = prompt | llm
+            print(f"[INFO] Utilisation du fournisseur LLM : {provider_name}")
+            return chain
+        except Exception as e:
+            print(f"[Fallback] {provider_name} a échoué ({e}). Tentative avec le fournisseur suivant...")
+            last_error = e
+            continue
+
+    raise RuntimeError(f"Tous les fournisseurs LLM ont échoué. Dernière erreur : {last_error}")
+
+
+def get_conversation_chain_no_history():
+    """
+    Crée et configure le pipeline de conversation LangChain SANS historique.
+    """
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", SYSTEM_PROMPT_NO_HISTORY),
+        ("user", USER_PROMPT),
+    ])
+
+    last_error = None
+    for provider_name, get_llm_fn in LLM_PROVIDERS:
+        try:
+            llm = get_llm_fn()
+            chain = prompt | llm
+            print(f"[INFO] Utilisation du fournisseur LLM (sans hist): {provider_name}")
+            return chain
+        except Exception as e:
+            print(f"[Fallback] {provider_name} a échoué ({e}). Tentative avec le fournisseur suivant...")
+            last_error = e
+            continue
+
+    raise RuntimeError(f"Tous les fournisseurs LLM ont échoué. Dernière erreur : {last_error}")
+
+
 async def classify_email_intent(message: str) -> bool:
     """
     Détermine si un message exprime une vraie intention d'envoyer un
     e-mail, via une classification légère par LLM plutôt qu'une simple
-    recherche de mots-clés (trop fragile : ratait des variantes comme
-    "mail" seul, ou au contraire se déclenchait sur toute question
-    contenant "candidat" ou "contact").
+    recherche de mots-clés.
 
     En cas d'échec de l'appel LLM (API indisponible, etc.), on retombe
     prudemment sur False : mieux vaut traiter le message comme une
@@ -180,84 +271,86 @@ async def classify_email_intent(message: str) -> bool:
             print(f"[Fallback] {provider_name} a échoué pour la classification d'intention ({e}).")
             continue
 
-    return False  # prudence : par défaut, on ne déclenche pas le workflow e-mail
+    return False
+
+
+async def stream_agent_response_with_history(question: str, chat_history: list[tuple[str, str]], n_results: int = 3):
+    """
+    Version streaming du pipeline agent avec historique de conversation.
+    """
+    retrieved_chunks = await asyncio.to_thread(search, question, n_results)
+    context = format_context(retrieved_chunks)
+    history_str = format_history(chat_history)
+
+    llm_chain = get_conversation_chain_with_history()
+    inputs = {"question": question, "context": context, "history": history_str}
+
+    async for chunk in llm_chain.astream(inputs):
+        text = extract_text(chunk.content)
+        if text:
+            yield text
 
 
 async def stream_agent_response(question: str, n_results: int = 3):
     """
-    Version streaming du pipeline agent, pour l'affichage progressif
-    (token par token) dans Chainlit. Applique le même fallback entre
-    fournisseurs que ask_agent() : si le streaming Gemini échoue avant
-    même de commencer, on bascule sur Grok.
+    Version streaming du pipeline agent, SANS historique (conservée pour
+    compatibilité / tests isolés).
     """
-    # search() est une fonction bloquante (calcul CPU). On l'exécute dans
-    # un thread séparé pour ne pas geler la boucle asynchrone de Chainlit
-    # pendant ce temps (sinon l'interface perd la connexion websocket).
     retrieved_chunks = await asyncio.to_thread(search, question, n_results)
     context = format_context(retrieved_chunks)
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT),
-        ("user", USER_PROMPT),
-    ])
+    llm_chain = get_conversation_chain_no_history()
 
-    last_error = None
-
-    for provider_name, get_llm_fn in LLM_PROVIDERS:
-        try:
-            llm = get_llm_fn()
-            chain = prompt | llm
-            async for chunk in chain.astream({"context": context, "question": question}):
-                text = extract_text(chunk.content)
-                if text:
-                    yield text
-            return  # streaming terminé avec succès, pas besoin d'essayer le fallback
-        except Exception as e:
-            print(f"[Fallback] {provider_name} a échoué en streaming ({e}). Tentative avec le fournisseur suivant...")
-            last_error = e
-            continue
-
-    raise RuntimeError(f"Tous les fournisseurs LLM ont échoué. Dernière erreur : {last_error}")
+    async for chunk in llm_chain.astream({"context": context, "question": question}):
+        text = extract_text(chunk.content)
+        if text:
+            yield text
 
 
-def ask_agent(question: str, n_results: int = 3) -> str:
+async def ask_agent_with_history(question: str, chat_history: list[tuple[str, str]], n_results: int = 3) -> str:
     """
-    Pipeline complet : retrieval + génération, avec fallback entre
-    fournisseurs LLM. Si Gemini échoue (limite de taux, erreur API,
-    clé manquante...), l'agent bascule automatiquement sur Grok.
+    Pipeline complet (non-streaming) : retrieval + génération, avec
+    gestion de l'historique de conversation.
     """
-    retrieved_chunks = search(question, n_results=n_results)
+    retrieved_chunks = await asyncio.to_thread(search, question, n_results)
+    context = format_context(retrieved_chunks)
+    history_str = format_history(chat_history)
+
+    llm_chain = get_conversation_chain_with_history()
+    inputs = {"question": question, "context": context, "history": history_str}
+
+    response = await llm_chain.ainvoke(inputs)
+    return extract_text(response.content)
+
+
+async def ask_agent(question: str, n_results: int = 3) -> str:
+    """
+    Pipeline complet (non-streaming) SANS historique, avec fallback
+    entre fournisseurs LLM.
+    """
+    retrieved_chunks = await asyncio.to_thread(search, question, n_results)
     context = format_context(retrieved_chunks)
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT),
-        ("user", USER_PROMPT),
-    ])
-
-    last_error = None
-
-    for provider_name, get_llm_fn in LLM_PROVIDERS:
-        try:
-            llm = get_llm_fn()
-            chain = prompt | llm
-            response = chain.invoke({"context": context, "question": question})
-            return extract_text(response.content)
-        except Exception as e:
-            print(f"[Fallback] {provider_name} a échoué ({e}). Tentative avec le fournisseur suivant...")
-            last_error = e
-            continue
-
-    raise RuntimeError(f"Tous les fournisseurs LLM ont échoué. Dernière erreur : {last_error}")
+    llm_chain = get_conversation_chain_no_history()
+    response = await llm_chain.ainvoke({"context": context, "question": question})
+    return extract_text(response.content)
 
 
 if __name__ == "__main__":
-    test_questions = [
-        "Quelles sont les conditions d'admission au programme FORCE-N ?",
-        "Qui finance le programme FORCE-N ?",
-        "Quel est le salaire moyen des alumni ?",  # question piège : pas dans le contexte
-    ]
+    import asyncio as _asyncio
 
-    for question in test_questions:
-        print(f"\n=== Question : {question} ===")
-        answer = ask_agent(question)
-        print(answer)
+    async def _run_tests():
+        test_questions = [
+            "Quelles sont les conditions d'admission au programme FORCE-N ?",
+            "Qui finance le programme FORCE-N ?",
+            "Quel est le salaire moyen des alumni ?",  # question piège : pas dans le contexte
+        ]
+        for question in test_questions:
+            print(f"\n=== Question : {question} ===")
+            try:
+                answer = await ask_agent(question)
+                print(answer)
+            except RuntimeError as e:
+                print(f"Erreur : {e}")
+
+    _asyncio.run(_run_tests())

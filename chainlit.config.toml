@@ -1,0 +1,18 @@
+[project]
+# Autoriser les profils d'invités
+allow_signup = true
+
+[ui]
+# Nom de l'application
+name = "FORCE-N Assistant"
+# Description
+description = "Un assistant IA pour répondre à vos questions sur le programme FORCE-N."
+# Couleur primaire pour l'interface (bleue du programme FORCE-N)
+primary_color = "#007bff"
+# Thème sombre/clair ('light', 'dark', 'auto')
+theme = "light"
+
+[meta]
+# Métadonnées HTML
+author = "FORCE-N / UN-CHK"
+keywords = "FORCE-N, IA, Sénégal, Emploi, Formation, Numérique"

@@ -1,17 +1,19 @@
 """
 Interface Chainlit de l'agent conversationnel FORCE-N.
 
-- Agent RAG conversationnel avec streaming
-- Classification d'intention par LLM (pas de mots-clés) pour distinguer
-  une vraie demande d'envoi d'e-mail d'une simple question
+Version 2 (complète) :
+- Agent RAG conversationnel avec streaming (comme la version 1)
+- Détection de l'intention d'envoyer un e-mail
 - Collecte conversationnelle des informations (destinataire, objet, corps)
 - Brouillon affiché avec boutons de confirmation/annulation
 - Envoi SMTP réel uniquement après confirmation explicite de l'utilisateur
 - Scheduler de surveillance des mises à jour démarré en arrière-plan
+- Gestion de l'historique de conversation (ajoutée dans cette version)
 """
 
+import os
 import chainlit as cl
-from rag_pipeline.agent import stream_agent_response, classify_email_intent
+from rag_pipeline.agent import stream_agent_response_with_history
 from rag_pipeline.vectorstore import get_embedding_function, get_chroma_client
 from email_tool.tool import draft_email, send_confirmed_email
 from updater.scheduler import start_scheduler
@@ -20,13 +22,62 @@ from updater.scheduler import start_scheduler
 # démarrage de l'application (pas à la première question posée), pour
 # que le premier échange avec un utilisateur soit rapide.
 print("Préchargement du modèle d'embeddings...")
-get_embedding_function()
-get_chroma_client()
-print("Préchargement terminé.")
+try:
+    get_embedding_function()
+    get_chroma_client()
+    print("Préchargement terminé.")
+except Exception as e:
+    print(f"Erreur lors du préchargement : {e}")
 
 # Démarrage du scheduler de surveillance des mises à jour, en tâche de
 # fond, une seule fois au lancement de l'application.
-start_scheduler()
+try:
+    start_scheduler()
+except Exception as e:
+    print(f"Erreur lors du démarrage du scheduler : {e}")
+
+# Mots-clés pour détecter l'intention d'envoyer un e-mail.
+# Approche équilibrée entre sensibilité et spécificité pour éviter :
+# - les faux positifs (ex: "candidater" -> "candidat")
+# - les dépendances supplémentaires (pas de LLM nécessaire pour cette détection)
+#
+# On cherche des expressions spécifiques qui indiquent clairement l'intention d'envoyer un email,
+# plutôt que des sous-chaînes génériques. Cela réduit les faux positifs tout en restant simple.
+# On normalise le texte pour gérer les variantes comme "e-mail", "email", "courriel".
+EMAIL_KEYWORDS = [
+    "envoyer un email",  # Couvre : envoyer un email, envoyer un e-mail
+    "envoyer un courriel",
+    "envoie un email",
+    "envoie un courriel",
+    "envoi email",       # Couvre : envoi email, envoi e-mail
+    "envoi courriel",
+    "ecrire à",          # Couvre : écrire à, écris à
+    "contacter",         # Couvre : contacter, contacter l'équipe
+    "postuler à",        # Couvre : postuler à, postuler pour
+    # "candidature à",     # RETIRÉ : trop générique, causait des faux positifs comme "je veux envoyer un e-mail de candidature"
+    "mail à",            # Couvre : mail à, email à, e-mail à, courriel à
+    "courriel à",
+]
+
+def normalize_text_for_keywords(text: str) -> str:
+    """Normalise le texte pour la détection de mots-clés : retire la ponctuation et remplace '-' par ' '."""
+    import re
+    # Remplacer les traits d'union par des espaces pour matcher "e-mail" comme "email"
+    text = text.replace('-', ' ')
+    # Retirer la ponctuation de base (optionnel, mais peut aider)
+    text = re.sub(r'[^\w\s]', ' ', text)
+    # Mettre en minuscule
+    return text.lower()
+
+def is_email_request(text: str) -> bool:
+    """Détecte si le message de l'utilisateur exprime l'intention d'envoyer un e-mail."""
+    # Normaliser le texte pour la recherche de mots-clés
+    normalized_text = normalize_text_for_keywords(text)
+    # Vérifier si l'un des mots-clés spécifiques est dans le message normalisé
+    for keyword in EMAIL_KEYWORDS:
+        if keyword in normalized_text:
+            return True
+    return False  # Si aucun mot-clé n'est trouvé, ce n'est pas une demande d'email
 
 
 async def collect_and_confirm_email():
@@ -42,7 +93,7 @@ async def collect_and_confirm_email():
     if not to_response:
         await cl.Message(content="Envoi annulé (pas de réponse reçue à temps).").send()
         return
-    to = to_response["output"].strip()
+    to = to_response["output"]
 
     subject_response = await cl.AskUserMessage(
         content="Quel est l'objet de l'e-mail ?", timeout=180
@@ -50,7 +101,7 @@ async def collect_and_confirm_email():
     if not subject_response:
         await cl.Message(content="Envoi annulé (pas de réponse reçue à temps).").send()
         return
-    subject = subject_response["output"].strip()
+    subject = subject_response["output"]
 
     body_response = await cl.AskUserMessage(
         content="Que veux-tu écrire dans le message ?", timeout=300
@@ -58,7 +109,7 @@ async def collect_and_confirm_email():
     if not body_response:
         await cl.Message(content="Envoi annulé (pas de réponse reçue à temps).").send()
         return
-    body = body_response["output"].strip()
+    body = body_response["output"]
 
     draft_preview = draft_email.invoke({"to": to, "subject": subject, "body": body})
 
@@ -100,7 +151,8 @@ async def on_cancel_send_email(action: cl.Action):
 
 @cl.on_chat_start
 async def start():
-    """Message de bienvenue affiché à l'ouverture d'une nouvelle conversation."""
+    """Initialise la session utilisateur avec un historique vide et affiche le message de bienvenue."""
+    cl.user_session.set("chat_history", [])
     await cl.Message(
         content=(
             "👋 Bonjour ! Je suis l'assistant IA du programme **FORCE-N**.\n\n"
@@ -117,19 +169,29 @@ async def start():
 async def main(message: cl.Message):
     """
     Appelé à chaque message envoyé par l'utilisateur.
-    Route soit vers le workflow e-mail, soit vers l'agent RAG (streaming),
-    selon une classification d'intention par LLM (pas de mots-clés).
+    Met à jour l'historique, route soit vers le workflow e-mail, soit vers l'agent RAG (streaming avec historique).
     """
-    wants_email = await classify_email_intent(message.content)
+    # Récupérer l'historique de la session
+    chat_history = cl.user_session.get("chat_history", [])
+    
+    # Ajouter le message de l'utilisateur à l'historique
+    chat_history.append(("user", message.content))
 
-    if wants_email:
+    if is_email_request(message.content):
         await collect_and_confirm_email()
+        # Ne pas oublier de remettre à jour l'historique même après un workflow d'email
+        cl.user_session.set("chat_history", chat_history)
         return
 
     response_msg = cl.Message(content="")
     await response_msg.send()
 
-    async for token in stream_agent_response(message.content):
+    # Appeler la nouvelle fonction qui gère l'historique
+    async for token in stream_agent_response_with_history(message.content, chat_history):
         await response_msg.stream_token(token)
+
+    # Ajouter la réponse de l'assistant à l'historique
+    chat_history.append(("assistant", response_msg.content))
+    cl.user_session.set("chat_history", chat_history)
 
     await response_msg.update()
